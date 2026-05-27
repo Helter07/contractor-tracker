@@ -139,7 +139,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;ba
 
 /* ── MODALS ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
-.overlay.open{display:flex}
+.overlay.open{display:flex}.overlay.show{display:flex}
 .mbox{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:sup .25s ease;padding-bottom:20px}
 @keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .mhandle{width:40px;height:4px;background:#DDD;border-radius:2px;margin:12px auto 6px}
@@ -447,6 +447,7 @@ function showApp(user){
   document.getElementById('page-loading').style.display='none';
   document.getElementById('page-login').style.display='none';
   document.getElementById('page-app').style.display='block';
+  document.getElementById('fab').style.display='flex';
   document.getElementById('um-name').textContent=user.displayName||'';
   document.getElementById('um-email').textContent=user.email||'';
   const av=document.getElementById('avbtn');
@@ -460,6 +461,7 @@ function showLogin(){
   if(unsubDB){unsubDB();unsubDB=null;}
   document.getElementById('page-loading').style.display='none';
   document.getElementById('page-app').style.display='none';
+  document.getElementById('fab').style.display='none';
   document.getElementById('page-login').style.display='flex';
   document.getElementById('login-msg').textContent='';
   const btn=document.querySelector('.google-btn');
@@ -597,7 +599,7 @@ function renderPays(){
   else tag.style.display='none';
   document.getElementById('pay-meta').textContent=visPays.length+' record(s) · Total: '+fmt(total);
   const el=document.getElementById('pays-list');
-  if(!visPays.length){el.innerHTML='<div class="empty"><div class="empty-icon">💵</div>No payments recorded yet.</div>';return;}
+  if(!visPays.length){el.innerHTML='<div class="empty"><div class="ei">💵</div>No payments recorded yet.</div>';return;}
   const rows=[...visPays].reverse().map((p,i)=>{
     const lot=state.lots.find(l=>l.id===p.lotId);
     return '<tr class="'+(i%2?'alt':'')+'"><td style="color:#888">'+esc(p.id)+'</td><td>'+fmtDate(p.date)+'</td><td style="color:#1E40AF;font-weight:600">'+esc(p.lotId)+'</td><td>'+esc(lot?lot.contractorName:'-')+'</td><td style="font-weight:600">'+fmt(p.amount)+'</td><td><span class="mode-pill">'+esc(p.mode)+'</span></td><td style="color:#888">'+esc(p.remarks||'-')+'</td></tr>';
