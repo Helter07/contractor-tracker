@@ -13,81 +13,89 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
+:root{--navy:#1F3864;--navy2:#16305A;--green:#059669;--red:#DC2626;--amber:#D97706;--purple:#7C3AED}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#F5F5F5;color:#1A1A1A;font-size:14px}
+html{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#F0F2F5;color:#1A1A1A;font-size:14px}
 
-/* PAGE SYSTEM */
+/* ── PAGE SYSTEM ── */
 #page-loading,#page-login,#page-app{position:fixed;inset:0;z-index:10}
-#page-loading{background:#1F3864;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:30}
+#page-loading{background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:30}
 #page-loading .spin{font-size:48px;animation:spin 1.5s linear infinite;margin-bottom:16px}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 #page-login{background:linear-gradient(160deg,#1F3864,#2D5090);display:none;align-items:center;justify-content:center;padding:24px;z-index:20;overflow-y:auto}
-#page-app{display:none;background:#F5F5F5;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:10;padding-bottom:20px}
+#page-app{display:none;background:#F0F2F5;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:70px}
 
-/* LOGIN */
+/* ── LOGIN ── */
 .login-card{background:#fff;border-radius:20px;padding:36px 28px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .login-logo{font-size:52px;margin-bottom:12px}
-.login-title{font-size:22px;font-weight:700;color:#1F3864;margin-bottom:6px}
+.login-title{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:6px}
 .login-sub{font-size:13px;color:#888;margin-bottom:28px;line-height:1.6}
 .google-btn{width:100%;padding:14px;background:#fff;border:2px solid #DDD;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:#1A1A1A}
 .google-btn:hover{border-color:#4285F4}
 .login-msg{font-size:12px;color:#888;margin-top:12px;min-height:20px}
 
-/* HEADER */
-.header{background:#1F3864;color:#fff;padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.header-left h1{font-size:16px;font-weight:700}
-.header-left p{font-size:10px;color:#B0C4DE;margin-top:1px}
-.header-right{display:flex;align-items:center;gap:8px}
-.hbtn{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
+/* ── TOP BAR ── */
+.topbar{background:var(--navy);color:#fff;padding:0 16px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.tb-left{display:flex;align-items:center;gap:8px}
+#tb-title{font-size:16px;font-weight:700;color:#fff}
+#tb-sub{font-size:10px;color:#B0C4DE;margin-top:1px}
+.tb-right{display:flex;align-items:center;gap:8px}
+.tb-btn{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:inherit}
 .avatar-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
 .avatar-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:#4ADE80;display:inline-block;margin-left:4px;vertical-align:middle}
 .sync-dot.busy{background:#FCD34D;animation:pulse .8s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* USER MENU */
-.umenu{position:fixed;top:60px;right:12px;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:8px;z-index:200;display:none;min-width:200px}
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #E0E0E0;display:flex;z-index:50;box-shadow:0 -2px 8px rgba(0,0,0,.08)}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 10px;cursor:pointer;border:none;background:none;color:#999;font-size:10px;font-family:inherit;gap:2px}
+.nav-tab .ni{font-size:22px;line-height:1}
+.nav-tab.on{color:var(--navy);font-weight:700}
+
+/* ── FAB ── */
+.fab{position:fixed;right:18px;bottom:76px;width:52px;height:52px;border-radius:50%;background:var(--navy);color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(31,56,100,.4);display:flex;align-items:center;justify-content:center;z-index:49}
+
+/* ── USER MENU ── */
+.umenu{position:fixed;top:60px;right:12px;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:8px;z-index:200;display:none;min-width:200px}
 .umenu.open{display:block}
 .umh{padding:10px 12px;border-bottom:1px solid #F0F0F0;margin-bottom:4px}
 .umn{font-size:14px;font-weight:700}
 .ume{font-size:11px;color:#888;margin-top:2px}
 .umi{padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:8px;color:#555}
 .umi:hover{background:#F5F5F5}
-.umi.danger{color:#DC2626}
+.umi.danger{color:var(--red)}
 
-/* CONTAINER */
-.container{max-width:1100px;margin:0 auto;padding:16px}
+/* ── SCREENS ── */
+.cscreen{display:none}
+.cscreen.on{display:block}
+.pg{padding:16px 16px 20px;max-width:900px;margin:0 auto}
 
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.stat-card{background:#fff;border-radius:10px;padding:14px 16px;border:1px solid #E0E0E0}
-.stat-label{font-size:11px;color:#888;margin-bottom:6px}
-.stat-val{font-size:22px;font-weight:600}
-.stat-val.warn{color:#D97706}.stat-val.red{color:#DC2626}
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:12px;padding:14px;border:1px solid #E8E8E8}
+.stat-label{font-size:11px;color:#888;margin-bottom:4px}
+.stat-val{font-size:20px;font-weight:700}
+.stat-val.warn{color:var(--amber)}.stat-val.red{color:var(--red)}
 
-/* TABS */
-.tabs{display:flex;border-bottom:2px solid #E0E0E0;margin-bottom:16px}
-.tab-btn{background:none;border:none;padding:10px 20px;font-size:13px;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit}
-.tab-btn.active{color:#1F3864;font-weight:600;border-bottom:2px solid #1F3864}
+/* ── BANNER ── */
+.banner{background:var(--navy);color:#fff;border-radius:14px;padding:16px;margin-bottom:16px}
+.banner h2{font-size:16px;font-weight:700}
+.banner p{font-size:12px;color:#AAC4EE;margin-top:3px}
 
-/* FILTER */
-.filter-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.filter-btn{background:#fff;border:1px solid #D0D0D0;border-radius:20px;padding:4px 14px;font-size:12px;cursor:pointer;font-family:inherit;color:#555}
-.filter-btn.active{background:#1F3864;color:#fff;border-color:#1F3864;font-weight:600}
+/* ── SECTION HEADER ── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sh h2{font-size:15px;font-weight:700}
 
-/* BUTTONS */
-.btn{border:1px solid #C0C0C0;border-radius:7px;padding:7px 14px;font-size:13px;background:#fff;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
-.btn:hover{background:#F0F0F0}
-.btn.primary{background:#1F3864;color:#fff;border-color:#1F3864;font-weight:600}
-.btn.primary:hover{background:#16305A}
-.btn.success{color:#065F46;border-color:#6EE7B7}
-.btn.danger{color:#DC2626;border-color:#FCA5A5}
-.btn.print-btn{color:#6D28D9;border-color:#C4B5FD;background:#F5F3FF}
-.btn.sm{padding:5px 11px;font-size:12px}
+/* ── FILTER BAR ── */
+.fbar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.fbar-btn{background:#fff;border:1px solid #D0D0D0;border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;font-family:inherit;color:#555}
+.fbar-btn.on{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
 
-/* LOT CARD */
-.lot-card{background:#fff;border:1px solid #E0E0E0;border-radius:12px;padding:16px 18px;margin-bottom:10px}
-.lot-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+/* ── LOT CARD ── */
+.lot-card{background:#fff;border:1px solid #E8E8E8;border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.lot-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
 .lot-id-badge{background:#DBEAFE;color:#1E40AF;font-size:12px;font-weight:600;padding:3px 12px;border-radius:20px;white-space:nowrap}
 .lot-name{font-size:15px;font-weight:600}
 .lot-item{font-size:12px;color:#888;margin-top:1px}
@@ -99,66 +107,81 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;ba
 .num-box{background:#F7F7F7;border-radius:8px;padding:8px 10px}
 .num-box .nl{font-size:10px;color:#888;margin-bottom:3px}
 .num-box .nv{font-size:13px;font-weight:600}
-.num-box .nv.warn{color:#D97706}.num-box .nv.red{color:#DC2626}
-.lot-meta{display:flex;gap:16px;font-size:12px;color:#888;margin-bottom:10px;flex-wrap:wrap;align-items:center}
-.lot-meta .ok{color:#059669;font-weight:600}
-.lot-meta .miss{color:#DC2626;font-weight:600}
+.num-box .nv.warn{color:var(--amber)}.num-box .nv.red{color:var(--red)}
+.lot-meta{display:flex;gap:12px;font-size:12px;color:#888;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.lot-meta .ok{color:var(--green);font-weight:600}
+.lot-meta .miss{color:var(--red);font-weight:600}
 .lot-meta .note{font-style:italic;color:#AAA}
 .lot-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 
-/* PAYMENTS TABLE */
-.table-wrap{border:1px solid #E0E0E0;border-radius:10px;overflow:hidden}
-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
-thead tr{background:#F5F5F5}
-th{padding:10px 11px;text-align:left;font-weight:600;color:#666;font-size:11px;border-bottom:1px solid #E0E0E0}
-td{padding:9px 11px;border-bottom:1px solid #F0F0F0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-tr:last-child td{border-bottom:none}
-tr.alt{background:#FAFAFA}
-.mode-pill{background:#F0F0F0;border:1px solid #DDD;padding:2px 8px;border-radius:12px;font-size:11px}
-.total-row td{font-weight:600;background:#F0F4FF}
+/* ── PAY ROWS ── */
+.payrow{background:#fff;border-radius:10px;margin-bottom:8px;padding:12px 14px;border:1px solid #E8E8E8;display:flex;align-items:center;gap:10px}
+.pdot{width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0}
+.pyi{flex:1;min-width:0}
+.pya{font-size:15px;font-weight:700;color:var(--green)}
+.pyd{font-size:11px;color:#888;margin-top:1px}
+.pymode{background:#F0F0F0;border-radius:10px;padding:3px 9px;font-size:11px}
 .pay-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .lot-filter-tag{background:#DBEAFE;color:#1E40AF;font-size:12px;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:6px}
 .lot-filter-tag .remove{cursor:pointer;font-weight:700;font-size:14px}
 
-/* EMPTY */
-.empty{text-align:center;padding:3rem;color:#AAA;border:1px solid #E0E0E0;border-radius:12px;background:#fff}
-.empty-icon{font-size:40px;margin-bottom:8px}
+/* ── BUTTONS ── */
+.btn{border:1px solid #CCC;border-radius:8px;padding:9px 16px;font-size:13px;background:#fff;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn:hover{background:#F0F0F0}
+.btn:active{opacity:.8}
+.btn.pri{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:700}
+.btn.pri:hover{background:var(--navy2)}
+.btn.grn{background:var(--green);color:#fff;border-color:var(--green);font-weight:700}
+.btn.red{color:var(--red);border-color:#FCA5A5}
+.btn.pur{color:var(--purple);border-color:#C4B5FD;background:#F5F3FF}
+.btn.sm{padding:6px 11px;font-size:12px}
+.btn.full{width:100%;justify-content:center;padding:13px;font-size:14px;border-radius:12px;margin-top:4px}
 
-/* OVERLAYS & MODALS */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end;justify-content:center}
-.overlay.show{display:flex}
-.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;animation:sup .25s ease;padding-bottom:20px}
+/* ── MODALS ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.mbox{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:sup .25s ease;padding-bottom:20px}
 @keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .mhandle{width:40px;height:4px;background:#DDD;border-radius:2px;margin:12px auto 6px}
-.modal-header{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 20px 14px;border-bottom:1px solid #F0F0F0}
-.modal-subtitle{font-size:12px;color:#888;margin-top:2px}
-.modal-body{padding:14px 20px}
-.modal-foot{padding:10px 20px 0;display:flex;gap:8px}
-.close-btn{background:#F0F0F0;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:#666;flex-shrink:0}
-.form-group{margin-bottom:13px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px}
-label{font-size:12px;color:#666;display:block;margin-bottom:4px;font-weight:500}
-input,select{width:100%;padding:11px 12px;font-size:14px;border:1.5px solid #DDD;border-radius:9px;font-family:inherit;background:#fff;color:#1A1A1A;outline:none;-webkit-appearance:none}
-input:focus,select:focus{border-color:#1F3864;box-shadow:0 0 0 3px #DBEAFE}
-.info-box{padding:10px 14px;border-radius:8px;font-size:13px;margin-top:2px;font-weight:600}
-.info-box.blue{background:#EFF6FF;color:#1D4ED8}
-.info-box.yellow{background:#FFFBEB;color:#92400E}
-.info-box.green{background:#ECFDF5;color:#065F46}
-.info-box.red{background:#FEF2F2;color:#B91C1C}
-.confirm-body{font-size:13px;color:#555;line-height:1.6}
+.mhead{padding:8px 20px 14px;border-bottom:1px solid #F0F0F0;display:flex;justify-content:space-between;align-items:center}
+.mhead h3{font-size:16px;font-weight:700}
+.mhead .msub{font-size:12px;color:#888}
+.mbody{padding:14px 20px}
+.mfoot{padding:10px 20px 0;display:flex;gap:8px}
+.xbtn{background:#F0F0F0;border:none;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#666}
 
+/* ── FORMS ── */
+.fg{margin-bottom:13px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
+label{font-size:12px;color:#555;display:block;margin-bottom:4px;font-weight:600}
+input,select{width:100%;padding:11px 12px;font-size:15px;border:1.5px solid #DDD;border-radius:9px;font-family:inherit;background:#fff;color:#1A1A1A;outline:none;-webkit-appearance:none}
+input:focus,select:focus{border-color:var(--navy);box-shadow:0 0 0 3px #DBEAFE}
+.ibox{padding:10px 14px;border-radius:9px;font-size:13px;font-weight:600;margin:6px 0}
+.ibox.blue{background:#EFF6FF;color:#1D4ED8}
+.ibox.yellow{background:#FFFBEB;color:#92400E}
+.ibox.green{background:#ECFDF5;color:#065F46}
+.ibox.red{background:#FEF2F2;color:#B91C1C}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:3rem 1rem;color:#AAA}
+.empty .ei{font-size:40px;margin-bottom:8px}
+
+/* ── RESPONSIVE ── */
 @media(min-width:600px){
   .overlay{align-items:center;padding:20px}
-  .modal{border-radius:16px;max-height:88vh}
+  .mbox{border-radius:16px;max-height:88vh}
   .mhandle{display:none}
+  .stats{grid-template-columns:repeat(4,1fr)}
 }
-@media(max-width:700px){
-  .stats{grid-template-columns:1fr 1fr}
+@media(max-width:600px){
+  .pg{padding:12px 12px 16px}
+  .stats{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-card{padding:10px 12px}
+  .stat-val{font-size:17px}
   .lot-nums{grid-template-columns:repeat(3,1fr)}
-  .form-row{grid-template-columns:1fr}
-  .container{padding:12px}
-  .header{padding:0 12px}
-  .header-left h1{font-size:14px}
+  .fr{grid-template-columns:1fr}
+  .topbar{padding:0 12px}
+  #tb-title{font-size:14px}
 }
 </style>
 </head>
@@ -168,7 +191,7 @@ input:focus,select:focus{border-color:#1F3864;box-shadow:0 0 0 3px #DBEAFE}
 <div id="page-loading">
   <div class="spin">🧵</div>
   <div style="font-size:20px;font-weight:700">Contractor Tracker</div>
-  <p style="font-size:13px;color:#B0C4DE;margin-top:6px">Loading...</p>
+  <p style="font-size:13px;color:#B0C4DE;margin-top:6px">Modrobe Impex</p>
 </div>
 
 <!-- LOGIN -->
@@ -187,53 +210,62 @@ input:focus,select:focus{border-color:#1F3864;box-shadow:0 0 0 3px #DBEAFE}
 
 <!-- APP -->
 <div id="page-app">
-
-  <div class="header">
-    <div class="header-left">
-      <h1>🧵 Contractor Tracker</h1>
-      <p>Modrobe Impex &mdash; Job Work <span class="sync-dot" id="sync-dot"></span></p>
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="tb-left">
+      <div>
+        <div id="tb-title">🧵 Contractor Tracker</div>
+        <div id="tb-sub">Modrobe Impex <span class="sync-dot" id="sync-dot"></span></div>
+      </div>
     </div>
-    <div class="header-right">
-      <button class="hbtn" onclick="openModal('addLot')">+ New Lot</button>
-      <button class="hbtn" onclick="openImportModal()" style="background:rgba(255,255,255,.1)">📥 Import</button>
+    <div class="tb-right">
+      <button class="tb-btn" onclick="openModal('addLot')">+ New Lot</button>
       <div class="avatar-btn" id="avbtn" onclick="toggleMenu()"></div>
     </div>
   </div>
 
-  <div class="container">
-    <div class="stats">
-      <div class="stat-card"><div class="stat-label">📦 Total Lots</div><div class="stat-val" id="st-total">0</div></div>
-      <div class="stat-card"><div class="stat-label">⏳ Pending</div><div class="stat-val warn" id="st-pending">0</div></div>
-      <div class="stat-card"><div class="stat-label">💵 Advance Paid</div><div class="stat-val" id="st-adv">Rs.0</div></div>
-      <div class="stat-card"><div class="stat-label">💰 Balance Due</div><div class="stat-val red" id="st-bal">Rs.0</div></div>
+  <!-- Content Screens -->
+  <div class="cscreen on" id="cs-home">
+    <div class="pg">
+      <div class="banner"><h2>📦 Contractor Overview</h2><p id="hdate"></p></div>
+      <div class="stats" id="home-stats"></div>
+      <div class="sh"><h2>Recent Lots</h2></div>
+      <div id="home-lots"></div>
     </div>
-    <div class="tabs">
-      <button class="tab-btn active" id="tab-lots-btn" onclick="switchTab('lots')">Lots (<span id="tab-lots-count">0</span>)</button>
-      <button class="tab-btn" id="tab-pays-btn" onclick="switchTab('pays')">Payments (<span id="tab-pays-count">0</span>)</button>
-    </div>
-    <div id="panel-lots">
-      <div class="filter-bar">
-        <button class="filter-btn active" onclick="setFilter('ALL',this)">All</button>
-        <button class="filter-btn" onclick="setFilter('PENDING',this)">Pending</button>
-        <button class="filter-btn" onclick="setFilter('RECEIVED',this)">Received</button>
-        <button class="filter-btn" onclick="setFilter('SETTLED',this)">Settled</button>
-      </div>
+  </div>
+
+  <div class="cscreen" id="cs-lots">
+    <div class="pg">
+      <div class="fbar" id="lots-fbar"></div>
       <div id="lots-list"></div>
     </div>
-    <div id="panel-pays" style="display:none">
+  </div>
+
+  <div class="cscreen" id="cs-pays">
+    <div class="pg">
       <div class="pay-header">
         <div style="display:flex;align-items:center;gap:8px">
           <span id="pay-lot-tag" style="display:none" class="lot-filter-tag"></span>
           <span id="pay-meta" style="font-size:12px;color:#888"></span>
         </div>
-        <button class="btn sm" onclick="openModal('addPayment')">+ Add Payment</button>
+        <button class="btn sm pri" onclick="openModal('addPayment')">+ Add Payment</button>
       </div>
       <div id="pays-list"></div>
     </div>
   </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-tab on" id="nt-home" onclick="goTab('home')"><div class="ni">🏠</div><div>Home</div></button>
+    <button class="nav-tab" id="nt-lots" onclick="goTab('lots')"><div class="ni">📦</div><div>Lots</div></button>
+    <button class="nav-tab" id="nt-pays" onclick="goTab('pays')"><div class="ni">💵</div><div>Payments</div></button>
+  </nav>
 </div>
 
-<!-- USER MENU -->
+<!-- FAB -->
+<button class="fab" id="fab" onclick="openModal('addLot')" style="display:none">+</button>
+
+<!-- User Menu -->
 <div class="umenu" id="umenu">
   <div class="umh"><div class="umn" id="um-name"></div><div class="ume" id="um-email"></div></div>
   <div class="umi" onclick="openImportModal()">📥 Import from Excel</div>
@@ -242,121 +274,116 @@ input:focus,select:focus{border-color:#1F3864;box-shadow:0 0 0 3px #DBEAFE}
 
 <!-- ADD LOT MODAL -->
 <div class="overlay" id="modal-addLot">
-<div class="modal"><div class="mhandle"></div>
-  <div class="modal-header"><h2>New Cutting Lot</h2><button class="close-btn" onclick="closeModal('addLot')">✕</button></div>
-  <div class="modal-body">
-    <div class="form-row">
+<div class="mbox"><div class="mhandle"></div>
+  <div class="mhead"><h3>New Cutting Lot</h3><button class="xbtn" onclick="closeModal('addLot')">✕</button></div>
+  <div class="mbody">
+    <div class="fr">
       <div><label>Contractor Name *</label><input id="f-contractor" placeholder="e.g. Ramesh Tailor" oninput="previewLot()"></div>
       <div><label>Item Description *</label><input id="f-item" placeholder="e.g. Lower, Kurta" oninput="previewLot()"></div>
     </div>
-    <div class="form-row">
-      <div><label>Total Pieces *</label><input id="f-pieces" type="number" placeholder="500" oninput="previewLot()"></div>
-      <div><label>Rate per Piece (Rs.) *</label><input id="f-rate" type="number" placeholder="23" oninput="previewLot()"></div>
+    <div class="fr">
+      <div><label>Total Pieces *</label><input id="f-pieces" type="number" placeholder="500" oninput="previewLot()" inputmode="numeric"></div>
+      <div><label>Rate per Piece (Rs.) *</label><input id="f-rate" type="number" placeholder="23" oninput="previewLot()" inputmode="decimal"></div>
     </div>
-    <div class="form-group"><label>Date Issued *</label><input id="f-date" type="date"></div>
-    <div class="form-group"><label>Remarks (optional)</label><input id="f-remarks" placeholder="Any notes"></div>
-    <div class="info-box blue" id="lot-preview" style="display:none;margin-bottom:8px"></div>
+    <div class="fg"><label>Date Issued *</label><input id="f-date" type="date"></div>
+    <div class="fg"><label>Remarks (optional)</label><input id="f-remarks" placeholder="Any notes"></div>
+    <div class="ibox blue" id="lot-preview" style="display:none"></div>
   </div>
-  <div class="modal-foot">
+  <div class="mfoot">
     <button class="btn" style="flex:1;justify-content:center" onclick="closeModal('addLot')">Cancel</button>
-    <button class="btn primary" style="flex:1;justify-content:center" onclick="addLot()">Create Lot</button>
+    <button class="btn pri" style="flex:1;justify-content:center" onclick="addLot()">Create Lot</button>
   </div>
 </div></div>
 
 <!-- ADD PAYMENT MODAL -->
 <div class="overlay" id="modal-addPayment">
-<div class="modal"><div class="mhandle"></div>
-  <div class="modal-header"><h2>Record Payment</h2><button class="close-btn" onclick="closeModal('addPayment')">✕</button></div>
-  <div class="modal-body">
-    <div class="form-group"><label>Lot No. *</label><select id="p-lotid" onchange="previewPay()"><option value="">Select lot...</option></select></div>
-    <div class="form-row">
+<div class="mbox"><div class="mhandle"></div>
+  <div class="mhead"><h3>Record Payment</h3><button class="xbtn" onclick="closeModal('addPayment')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>Lot No. *</label><select id="p-lotid" onchange="previewPay()"><option value="">Select lot...</option></select></div>
+    <div class="fr">
       <div><label>Payment Date *</label><input id="p-date" type="date"></div>
       <div><label>Amount (Rs.) *</label><input id="p-amount" type="number" placeholder="2000" oninput="previewPay()" inputmode="numeric"></div>
     </div>
-    <div class="form-group"><label>Mode</label><select id="p-mode"><option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option><option>Other</option></select></div>
-    <div class="form-group"><label>Remarks</label><input id="p-remarks" placeholder="e.g. Running advance"></div>
-    <div class="info-box yellow" id="pay-preview" style="display:none;margin-bottom:8px"></div>
+    <div class="fg"><label>Mode</label><select id="p-mode"><option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option><option>Other</option></select></div>
+    <div class="fg"><label>Remarks</label><input id="p-remarks" placeholder="e.g. Running advance"></div>
+    <div class="ibox yellow" id="pay-preview" style="display:none"></div>
   </div>
-  <div class="modal-foot">
+  <div class="mfoot">
     <button class="btn" style="flex:1;justify-content:center" onclick="closeModal('addPayment')">Cancel</button>
-    <button class="btn primary" style="flex:1;justify-content:center" onclick="addPayment()">Save Payment</button>
+    <button class="btn pri" style="flex:1;justify-content:center" onclick="addPayment()">Save Payment</button>
   </div>
 </div></div>
 
 <!-- RECEIVE LOT MODAL -->
 <div class="overlay" id="modal-receive">
-<div class="modal"><div class="mhandle"></div>
-  <div class="modal-header">
-    <div><h2>Receive Lot Back</h2><div class="modal-subtitle" id="recv-subtitle"></div></div>
-    <button class="close-btn" onclick="closeModal('receive')">✕</button>
+<div class="mbox"><div class="mhandle"></div>
+  <div class="mhead">
+    <div><h3>Receive Lot Back</h3><div class="msub" id="recv-subtitle"></div></div>
+    <button class="xbtn" onclick="closeModal('receive')">✕</button>
   </div>
-  <div class="modal-body">
-    <div class="info-box blue" id="recv-issued" style="margin-bottom:14px"></div>
-    <div class="form-row">
+  <div class="mbody">
+    <div class="ibox blue" id="recv-issued" style="margin-bottom:14px"></div>
+    <div class="fr">
       <div><label>Pieces Received *</label><input id="r-pieces" type="number" oninput="previewRecv()" inputmode="numeric"></div>
       <div><label>Date Received *</label><input id="r-date" type="date"></div>
     </div>
-    <div class="info-box green" id="recv-preview" style="display:none;margin-bottom:8px"></div>
+    <div class="ibox green" id="recv-preview" style="display:none"></div>
   </div>
-  <div class="modal-foot">
+  <div class="mfoot">
     <button class="btn" style="flex:1;justify-content:center" onclick="closeModal('receive')">Cancel</button>
-    <button class="btn primary" style="flex:1;justify-content:center" onclick="receiveLot()">Confirm Receipt</button>
+    <button class="btn pri" style="flex:1;justify-content:center" onclick="receiveLot()">Confirm Receipt</button>
   </div>
 </div></div>
 
 <!-- CONFIRM DELETE MODAL -->
 <div class="overlay" id="modal-confirm">
-<div class="modal" style="max-width:420px"><div class="mhandle"></div>
-  <div class="modal-header"><h2>Confirm Delete</h2><button class="close-btn" onclick="closeModal('confirm')">✕</button></div>
-  <div class="modal-body"><div id="confirm-msg" class="confirm-body"></div></div>
-  <div class="modal-foot" style="margin-top:16px">
+<div class="mbox" style="max-height:80vh"><div class="mhandle"></div>
+  <div class="mhead"><h3>Confirm Delete</h3><button class="xbtn" onclick="closeModal('confirm')">✕</button></div>
+  <div class="mbody"><div id="confirm-msg" style="font-size:13px;color:#555;line-height:1.6"></div></div>
+  <div class="mfoot" style="margin-top:16px">
     <button class="btn" style="flex:1;justify-content:center" onclick="closeModal('confirm')">Cancel</button>
-    <button class="btn danger" style="flex:1;justify-content:center;background:#FEF2F2;font-weight:700" id="confirm-ok-btn">Yes, Delete</button>
+    <button class="btn red" style="flex:1;justify-content:center;background:#FEF2F2;font-weight:700" id="confirm-ok-btn">Yes, Delete</button>
   </div>
 </div></div>
 
 <!-- IMPORT EXCEL MODAL -->
 <div class="overlay" id="modal-import">
-<div class="modal" style="max-height:95vh"><div class="mhandle"></div>
-  <div class="modal-header"><h2>📥 Import from Excel</h2><button class="close-btn" onclick="closeModal('import')">✕</button></div>
-  <div class="modal-body" id="imp-body" style="overflow-y:auto">
-
+<div class="mbox" style="max-height:95vh"><div class="mhandle"></div>
+  <div class="mhead"><h3>📥 Import from Excel</h3><button class="xbtn" onclick="closeModal('import')">✕</button></div>
+  <div class="mbody" style="overflow-y:auto">
     <div id="imp-step1">
       <div style="background:#F0F4FF;border:2px dashed #93C5FD;border-radius:12px;padding:24px;text-align:center;cursor:pointer;margin-bottom:14px" onclick="document.getElementById('imp-file').click()">
         <div style="font-size:36px;margin-bottom:8px">📊</div>
-        <div style="font-size:14px;font-weight:700;color:#1F3864;margin-bottom:4px">Tap to select Excel file</div>
-        <div style="font-size:12px;color:#888">.xlsx format</div>
+        <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px">Tap to select Excel file</div>
+        <div style="font-size:12px;color:#888">.xlsx format (FABRICATORS sheet format)</div>
       </div>
       <input type="file" id="imp-file" accept=".xlsx,.xls" style="display:none" onchange="readImportFile(this)">
       <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:12px 14px;font-size:12px;color:#92400E">
-        <strong>Expected Excel format:</strong><br>
-        Columns: Lot ID · Contractor · Item · Pieces Issued · Rate · Date Issued · Pieces Received · Date Received · Status · Advance Paid<br><br>
-        OR any sheet with columns containing lot/contractor/pieces/rate info. New lots not already in the app will be added.
+        <strong>Reads your FABRICATORS.xlsx format:</strong><br>
+        Each sheet = one contractor · Columns: DATE · ITEM NAME · RATE · Pieces sent · REC. DATE · PIECE RECIEVED · Payment done<br><br>
+        New lots not already in app will be added. Existing ones are skipped.
       </div>
     </div>
-
     <div id="imp-step2" style="display:none;text-align:center;padding:24px">
       <div style="font-size:36px;margin-bottom:10px">⏳</div>
-      <div style="font-size:14px;font-weight:600;color:#1F3864" id="imp-prog-text">Reading file...</div>
+      <div style="font-size:14px;font-weight:600;color:var(--navy)" id="imp-prog-text">Reading file...</div>
       <div style="background:#E5E7EB;border-radius:4px;height:8px;overflow:hidden;margin:12px 0">
-        <div id="imp-prog-fill" style="background:#1F3864;height:8px;border-radius:4px;width:0%;transition:width .3s"></div>
+        <div id="imp-prog-fill" style="background:var(--navy);height:8px;border-radius:4px;width:0%;transition:width .3s"></div>
       </div>
     </div>
-
     <div id="imp-step3" style="display:none">
       <div id="imp-summary" style="margin-bottom:12px"></div>
       <div style="font-size:12px;font-weight:700;color:#555;margin-bottom:8px">Preview — New lots to be added:</div>
       <div id="imp-preview" style="max-height:320px;overflow-y:auto"></div>
     </div>
-
     <div id="imp-step4" style="display:none;text-align:center;padding:20px">
       <div style="font-size:48px;margin-bottom:10px">🎉</div>
-      <div style="font-size:16px;font-weight:700;color:#1F3864;margin-bottom:6px" id="imp-done-title"></div>
+      <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px" id="imp-done-title"></div>
       <div style="font-size:13px;color:#888" id="imp-done-sub"></div>
     </div>
-
   </div>
-  <div class="modal-foot" id="imp-foot">
+  <div class="mfoot" id="imp-foot">
     <button class="btn" style="flex:1;justify-content:center" onclick="closeModal('import')">Cancel</button>
   </div>
 </div></div>
@@ -425,6 +452,7 @@ function showApp(user){
   const av=document.getElementById('avbtn');
   if(user.photoURL) av.innerHTML='<img src="'+user.photoURL+'" referrerpolicy="no-referrer">';
   else av.textContent=(user.displayName||'U')[0].toUpperCase();
+  document.getElementById('hdate').textContent='Today: '+fmtDate(today());
   subscribeData();
 }
 function showLogin(){
@@ -466,25 +494,73 @@ function closeMenu(){document.getElementById('umenu').classList.remove('open');}
 document.addEventListener('click',e=>{const m=document.getElementById('umenu'),b=document.getElementById('avbtn');if(m.classList.contains('open')&&!m.contains(e.target)&&!b.contains(e.target))closeMenu();});
 
 /* ══ RENDER ══ */
-let curFilter='ALL',curTab='lots',payLotFilter=null,currentReceiveLotId=null;
-function render(){renderStats();renderLots();renderPays();renderTabCounts();}
+let curFilter='ALL',curTab='home',payLotFilter=null,currentReceiveLotId=null;
 
-function renderStats(){
+function goTab(tab){
+  curTab=tab;
+  document.querySelectorAll('.cscreen').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('cs-'+tab).classList.add('on');
+  document.getElementById('nt-'+tab).classList.add('on');
+  if(tab==='home') renderHome();
+  if(tab==='lots') renderLots();
+  if(tab==='pays') renderPays();
+}
+
+function render(){
+  renderStats();
+  if(curTab==='home') renderHome();
+  if(curTab==='lots') renderLots();
+  if(curTab==='pays') renderPays();
+}
+
+function renderHome(){
   const adv=state.pays.reduce((s,p)=>s+p.amount,0);
   const bal=state.lots.reduce((s,l)=>s+Math.max(0,balDue(l)),0);
-  document.getElementById('st-total').textContent=state.lots.length;
-  document.getElementById('st-pending').textContent=state.lots.filter(l=>l.status==='PENDING').length;
-  document.getElementById('st-adv').textContent=fmt(adv);
-  document.getElementById('st-bal').textContent=fmt(bal);
+  document.getElementById('home-stats').innerHTML=
+    '<div class="stat-card"><div class="stat-label">📦 Total Lots</div><div class="stat-val">'+state.lots.length+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">⏳ Pending</div><div class="stat-val warn">'+state.lots.filter(l=>l.status==="PENDING").length+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">💵 Advance Paid</div><div class="stat-val">'+fmt(adv)+'</div></div>'+
+    '<div class="stat-card"><div class="stat-label">💰 Balance Due</div><div class="stat-val red">'+fmt(bal)+'</div></div>';
+  const recent=[...state.lots].reverse().slice(0,5);
+  document.getElementById('home-lots').innerHTML=recent.length?recent.map(renderLotCard).join(''):'<div class="empty"><div class="ei">📦</div><p>No lots yet. Tap + to start.</p></div>';
 }
-function renderTabCounts(){
-  document.getElementById('tab-lots-count').textContent=state.lots.length;
-  document.getElementById('tab-pays-count').textContent=state.pays.length;
+
+function renderStats(){} function renderTabCounts(){}
+function renderLotCard(lot){
+  const adv=advPaid(lot.id);
+  const payable=(lot.piecesReceived!=null?lot.piecesReceived:lot.piecesIssued)*lot.rate;
+  const bal=payable-adv;
+  const miss=lot.piecesReceived!=null?lot.piecesIssued-lot.piecesReceived:null;
+  const lotPayCount=state.pays.filter(p=>p.lotId===lot.id).length;
+  const metaPcs=miss!=null?'<span class="'+(miss>0?'miss':'ok')+'">'+( miss>0?'⚠ ':'✓ ')+'Received: '+fmtN(lot.piecesReceived)+' pcs'+(miss>0?' ('+miss+' missing)':'')+'</span>':''  ;
+  const metaNote=lot.remarks?'<span class="note">&ldquo;'+esc(lot.remarks)+'&rdquo;</span>':''  ;
+  const actPay=(lot.status==='PENDING'||lot.status==='RECEIVED')?'<button class="btn sm" onclick="openModal(\'addPayment\',\''+lot.id+'\')">💵 + Payment</button>':''  ;
+  const actRecv=lot.status==='PENDING'?'<button class="btn sm" onclick="openReceive(\''+lot.id+'\')">📥 Receive Lot</button>':''  ;
+  const actSettle=lot.status==='RECEIVED'?'<button class="btn sm grn" onclick="settleLot(\''+lot.id+'\')">✅ Mark Settled</button>':''  ;
+  return '<div class="lot-card">'+
+    '<div class="lot-card-header"><div style="display:flex;align-items:center;gap:10px"><span class="lot-id-badge">'+esc(lot.id)+'</span><div><div class="lot-name">'+esc(lot.contractorName)+'</div><div class="lot-item">'+esc(lot.item)+'</div></div></div><span class="status-badge status-'+lot.status+'">'+lot.status+'</span></div>'+
+    '<div class="lot-nums">'+
+      '<div class="num-box"><div class="nl">Issued</div><div class="nv">'+fmtN(lot.piecesIssued)+' pcs</div></div>'+
+      '<div class="num-box"><div class="nl">Rate</div><div class="nv">Rs.'+lot.rate+'/pc</div></div>'+
+      '<div class="num-box"><div class="nl">Total Agreed</div><div class="nv">'+fmt(lot.piecesIssued*lot.rate)+'</div></div>'+
+      '<div class="num-box"><div class="nl">Advance Paid</div><div class="nv '+(adv>0?'warn':'')+'">'+fmt(adv)+'</div></div>'+
+      '<div class="num-box"><div class="nl">'+(lot.status==='PENDING'?'Est. Balance':'Balance Due')+'</div><div class="nv '+(bal>0?'red':'')+'">'+fmt(bal)+'</div></div>'+
+    '</div>'+
+    '<div class="lot-meta"><span>📤 Out: '+fmtDate(lot.dateIssued)+'</span><span>📥 In: '+fmtDate(lot.dateReceived)+'</span>'+metaPcs+metaNote+'</div>'+
+    '<div class="lot-actions">'+actPay+actRecv+actSettle+
+      '<button class="btn sm pur" onclick="printLot(\''+lot.id+'\')">🖨 Print</button>'+
+      '<button class="btn sm" style="margin-left:auto" onclick="viewLotPayments(\''+lot.id+'\')">🕒 Pays ('+lotPayCount+')</button>'+
+      '<button class="btn sm red" onclick="confirmDelete(\''+lot.id+'\')">🗑</button>'+
+    '</div></div>';
 }
+
 function renderLots(){
+  const filters=['ALL','PENDING','RECEIVED','SETTLED'];
+  document.getElementById('lots-fbar').innerHTML=filters.map(f=>'<button class="fbar-btn '+(curFilter===f?'on':'')+'" onclick="setFilter(\''+ f+'\',this)">'+(f==='ALL'?'All':f.charAt(0)+f.slice(1).toLowerCase())+'</button>').join('');
   const list=document.getElementById('lots-list');
   const vis=curFilter==='ALL'?state.lots:state.lots.filter(l=>l.status===curFilter);
-  if(!vis.length){list.innerHTML='<div class="empty"><div class="empty-icon">📦</div>'+(curFilter==='ALL'?'No lots yet. Tap <b>+ New Lot</b> to start.':'No '+curFilter.toLowerCase()+' lots.')+'</div>';return;}
+  if(!vis.length){list.innerHTML='<div class="empty"><div class="ei">📦</div><p>'+(curFilter==='ALL'?'No lots yet. Tap + to start.':'No '+curFilter.toLowerCase()+' lots.')+'</p></div>';return;}
   list.innerHTML=[...vis].reverse().map(lot=>{
     const adv=advPaid(lot.id);
     const payable=(lot.piecesReceived!=null?lot.piecesReceived:lot.piecesIssued)*lot.rate;
@@ -530,15 +606,9 @@ function renderPays(){
 }
 
 /* ══ TABS & FILTERS ══ */
-function switchTab(t){
-  curTab=t;
-  document.getElementById('panel-lots').style.display=t==='lots'?'block':'none';
-  document.getElementById('panel-pays').style.display=t==='pays'?'block':'none';
-  document.getElementById('tab-lots-btn').className='tab-btn'+(t==='lots'?' active':'');
-  document.getElementById('tab-pays-btn').className='tab-btn'+(t==='pays'?' active':'');
-}
-function setFilter(f,btn){curFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderLots();}
-function viewLotPayments(lid){payLotFilter=lid;switchTab('pays');renderPays();}
+function switchTab(t){goTab(t);}
+function setFilter(f,btn){curFilter=f;renderLots();}
+function viewLotPayments(lid){payLotFilter=lid;goTab('pays');renderPays();}
 function clearPayFilter(){payLotFilter=null;renderPays();}
 
 /* ══ MODALS ══ */
@@ -654,7 +724,7 @@ function readImportFile(input){
     try{
       document.getElementById('imp-prog-fill').style.width='60%';
       const data=new Uint8Array(e.target.result);
-      const wb=XLSX.read(data,{type:'array',cellDates:true});
+      const wb=XLSX.read(data,{type:'array',cellDates:true,raw:false});
       document.getElementById('imp-prog-fill').style.width='80%';
       const result=parseContractorExcel(wb);
       document.getElementById('imp-prog-fill').style.width='100%';
@@ -670,104 +740,167 @@ function readImportFile(input){
 }
 function toDateStr(v){
   if(!v)return null;
-  if(v instanceof Date)return v.toISOString().split('T')[0];
-  const s=String(v);
-  const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-  if(m){const yr=m[3].length===2?'20'+m[3]:m[3];return yr+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');}
+  // JS Date object
+  if(v instanceof Date){
+    if(isNaN(v.getTime()))return null;
+    const yr=v.getFullYear();
+    const mo=String(v.getMonth()+1).padStart(2,'0');
+    const dy=String(v.getDate()).padStart(2,'0');
+    return yr+'-'+mo+'-'+dy;
+  }
+  const s=String(v).trim();
+  if(!s||s==='null'||s==='undefined')return null;
+  // ISO format: 2026-02-14 or 2026-02-14T00:00:00
+  const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(iso)return iso[1]+'-'+iso[2]+'-'+iso[3];
+  // dd/mm/yyyy or dd-mm-yyyy
+  const dmy=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(dmy){const yr=dmy[3].length===2?'20'+dmy[3]:dmy[3];return yr+'-'+dmy[2].padStart(2,'0')+'-'+dmy[1].padStart(2,'0');}
+  // mm/dd/yyyy (US format from XLSX.js)
+  const mdy=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(mdy){return mdy[3]+'-'+mdy[1].padStart(2,'0')+'-'+mdy[2].padStart(2,'0');}
+  // Try Date parse as last resort
+  const d=new Date(s);
+  if(!isNaN(d.getTime()))return toDateStr(d);
   return null;
 }
 function parseContractorExcel(wb){
-  const newLots=[],newPays=[];
-  let lotCtr=state.lotCtr,payCtr=state.payCtr,skipped=0;
+  const newLots=[], newPays=[];
+  let lotCtr=state.lotCtr, payCtr=state.payCtr, skipped=0;
 
   wb.SheetNames.forEach(sheetName=>{
-    if(sheetName.toLowerCase().includes('sample')||sheetName.toLowerCase().includes('copy')) return;
-    const ws=wb.Sheets[sheetName];
-    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:false});
-    if(rows.length<2)return;
+    // Skip sample/copy sheets
+    if(sheetName.toLowerCase().includes('sample') || sheetName.toLowerCase().includes('copy')) return;
 
-    const contractorName=sheetName.trim();
+    const ws = wb.Sheets[sheetName];
+    // Use raw:false so dates come as strings, numbers as numbers
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:false});
+    if(!rows || rows.length < 2) return;
 
-    // Col positions (0-indexed):
-    // 0=DATE, 1=ITEM CODE, 2=ITEM NAME, 3=RATE, 4=Pieces sent
-    // 7=REC.DATE, 8=PIECE RECIEVED, 10=TOTAL AMOUNT, 11=PIECES PENDING
-    // 12=payment date, 13=Payment done, 14=Balance, 16=NOTES
+    const contractorName = sheetName.trim();
 
-    for(let i=1;i<rows.length;i++){
-      const row=rows[i];
-      if(!row||!row[0])continue;
+    // Find header row - look for row containing 'DATE'
+    let headerIdx = -1;
+    let colMap = {};
+    for(let i=0; i<Math.min(rows.length,5); i++){
+      const row = rows[i];
+      if(!row) continue;
+      const rowStr = row.map(c=>String(c||'').toUpperCase()).join('|');
+      if(rowStr.includes('DATE') && rowStr.includes('RATE')){
+        headerIdx = i;
+        // Map column names to indices
+        row.forEach((cell, idx)=>{
+          const h = String(cell||'').toUpperCase().trim();
+          if(h==='DATE') colMap.date = idx;
+          else if(h==='ITEM CODE') colMap.itemCode = idx;
+          else if(h==='ITEM NAME') colMap.itemName = idx;
+          else if(h==='RATE') colMap.rate = idx;
+          else if(h.includes('PIECES SENT') || h==='PIECES SENT') colMap.piecesOut = idx;
+          else if(h==='REC. DATE' || h==='REC.DATE' || h.includes('REC') && h.includes('DATE')) colMap.dateRecv = idx;
+          else if(h.includes('PIECE') && h.includes('RECIEVED') || h.includes('PIECE') && h.includes('RECEIVED')) colMap.piecesRecv = idx;
+          else if(h.includes('TOTAL AMOUNT')) colMap.totalAmt = idx;
+          else if(h.includes('PIECES PENDING')) colMap.piecesPend = idx;
+          else if(h.includes('PAYMENT DATE') || h==='PAYMENT DATE') colMap.payDate = idx;
+          else if(h==='PAYMENT DONE') colMap.payDone = idx;
+          else if(h==='BALANCE') colMap.balance = idx;
+          else if(h==='NOTES') colMap.notes = idx;
+        });
+        break;
+      }
+    }
 
-      const dateIssued=toDateStr(row[0]);
-      if(!dateIssued)continue;
+    // Fallback col positions if header not found (0-indexed)
+    // DATE=0, ITEM CODE=1, ITEM NAME=2, RATE=3, Pieces sent=4
+    // REC.DATE=7, PIECE RECIEVED=8, TOTAL AMOUNT=10, PIECES PENDING=11
+    // payment date=12, Payment done=13, Balance=14, NOTES=16
+    if(headerIdx === -1){
+      colMap = {date:0,itemCode:1,itemName:2,rate:3,piecesOut:4,dateRecv:7,piecesRecv:8,totalAmt:10,piecesPend:11,payDate:12,payDone:13,balance:14,notes:16};
+      headerIdx = 0;
+    }
 
-      const itemCode=String(row[1]||'').trim();
-      const itemName=String(row[2]||'').trim();
-      const item=(itemName||itemCode||'Garment');
-      const rate=parseFloat(row[3]);
-      const piecesIssued=parseFloat(row[4]);
-      const dateRecv=toDateStr(row[7]);
-      const piecesRecv=parseFloat(row[8]);
-      const totalAmt=parseFloat(row[10]);
-      const piecesPending=parseFloat(row[11]);
-      const paymentDone=parseFloat(row[13]);
-      const balance=parseFloat(row[14]);
-      const notes=String(row[16]||'').trim();
+    // Process data rows
+    const startRow = headerIdx + 1;
+    for(let i=startRow; i<rows.length; i++){
+      const row = rows[i];
+      if(!row) continue;
 
-      if(!piecesIssued||!rate||isNaN(piecesIssued)||isNaN(rate))continue;
+      const rawDate = row[colMap.date];
+      if(!rawDate) continue;
 
-      // Check duplicate by contractor+date+pieces
-      const dup=state.lots.find(l=>
-        l.contractorName.toLowerCase()===contractorName.toLowerCase()&&
-        l.dateIssued===dateIssued&&
-        Math.abs(l.piecesIssued-Math.round(piecesIssued))<2
+      // Parse date
+      const dateIssued = toDateStr(rawDate);
+      if(!dateIssued) continue;
+
+      // Get values
+      const itemCode = String(row[colMap.itemCode]||'').trim();
+      const itemName = String(row[colMap.itemName]||'').trim();
+      const item = itemName || itemCode || 'Garment';
+      const rate = parseFloat(row[colMap.rate]);
+      const piecesOut = parseFloat(row[colMap.piecesOut]);
+
+      // Skip rows without valid pieces/rate
+      if(!piecesOut || !rate || isNaN(piecesOut) || isNaN(rate) || piecesOut <= 0 || rate <= 0) continue;
+
+      const dateRecv = toDateStr(row[colMap.dateRecv]);
+      const piecesRecv = parseFloat(row[colMap.piecesRecv]);
+      const totalAmt = parseFloat(row[colMap.totalAmt]);
+      const piecesPend = parseFloat(row[colMap.piecesPend]);
+      const payDate = toDateStr(row[colMap.payDate]);
+      const payDone = parseFloat(row[colMap.payDone]);
+      const balance = parseFloat(row[colMap.balance]);
+      const notes = String(row[colMap.notes]||'').trim();
+
+      // Check for duplicate
+      const dup = state.lots.find(l=>
+        l.contractorName.toLowerCase()===contractorName.toLowerCase() &&
+        l.dateIssued===dateIssued &&
+        Math.abs(l.piecesIssued - Math.round(piecesOut)) < 2
       );
-      if(dup){skipped++;continue;}
+      if(dup){ skipped++; continue; }
 
       lotCtr++;
-      const lotId='LOT-'+pad(lotCtr);
+      const lotId = 'LOT-' + String(lotCtr).padStart(3,'0');
 
       // Determine status
-      const hasPending=!isNaN(piecesPending)&&piecesPending>0;
-      const hasBalance=!isNaN(balance)&&balance>0;
-      let status='PENDING';
-      if(!isNaN(piecesRecv)&&piecesRecv>0){
-        if(!hasBalance&&!isNaN(paymentDone)&&paymentDone>0) status='SETTLED';
-        else status='RECEIVED';
+      const hasPiecesBack = !isNaN(piecesRecv) && piecesRecv > 0;
+      const hasBalance = !isNaN(balance) && balance > 0;
+      let status = 'PENDING';
+      if(hasPiecesBack){
+        status = (!hasBalance && !isNaN(payDone) && payDone > 0) ? 'SETTLED' : 'RECEIVED';
       }
 
-      const actualPiecesRecv=(!isNaN(piecesRecv)&&piecesRecv>0)?Math.round(piecesRecv):null;
-      const lotTotal=isNaN(totalAmt)?Math.round(piecesIssued*rate):Math.round(totalAmt);
+      // Use total amount from Excel if available, else calculate
+      const lotTotal = (!isNaN(totalAmt) && totalAmt > 0) ? Math.round(totalAmt) : Math.round(piecesOut * rate);
 
       newLots.push({
-        id:lotId,
+        id: lotId,
         contractorName,
         item,
-        piecesIssued:Math.round(piecesIssued),
-        rate:Math.round(rate*100)/100,
+        piecesIssued: Math.round(piecesOut),
+        rate: Math.round(rate * 100) / 100,
         dateIssued,
-        piecesReceived:actualPiecesRecv,
-        dateReceived:dateRecv||null,
+        piecesReceived: hasPiecesBack ? Math.round(piecesRecv) : null,
+        dateReceived: dateRecv || null,
         status,
-        remarks:notes||''
+        remarks: notes || ''
       });
 
-      // Record payment if payment was made
-      if(!isNaN(paymentDone)&&paymentDone>0){
+      // Record payment if made
+      if(!isNaN(payDone) && payDone > 0){
         payCtr++;
-        const payDate=toDateStr(row[12])||dateIssued;
         newPays.push({
-          id:'PAY-'+pad(payCtr),
+          id: 'PAY-' + String(payCtr).padStart(3,'0'),
           lotId,
-          date:payDate,
-          amount:Math.round(paymentDone),
-          mode:'Cash',
-          remarks:notes?notes.substring(0,50):''
+          date: payDate || dateIssued,
+          amount: Math.round(payDone),
+          mode: 'Cash',
+          remarks: notes ? notes.substring(0,60) : ''
         });
       }
     }
   });
 
-  return{newLots,newPays,lotCtr,payCtr,skipped};
+  return { newLots, newPays, lotCtr, payCtr, skipped };
 }
 function showImportPreview(r){
   document.getElementById('imp-step2').style.display='none';
