@@ -679,47 +679,94 @@ function toDateStr(v){
 function parseContractorExcel(wb){
   const newLots=[],newPays=[];
   let lotCtr=state.lotCtr,payCtr=state.payCtr,skipped=0;
+
   wb.SheetNames.forEach(sheetName=>{
+    if(sheetName.toLowerCase().includes('sample')||sheetName.toLowerCase().includes('copy')) return;
     const ws=wb.Sheets[sheetName];
     const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:false});
     if(rows.length<2)return;
-    // Try to detect columns from header row
-    const header=(rows[0]||[]).map(h=>String(h||'').toLowerCase());
-    const ci={
-      contractor: header.findIndex(h=>h.includes('contractor')||h.includes('name')),
-      item:       header.findIndex(h=>h.includes('item')||h.includes('product')||h.includes('desc')),
-      pieces:     header.findIndex(h=>h.includes('piece')||h.includes('qty')||h.includes('issued')),
-      rate:       header.findIndex(h=>h.includes('rate')||h.includes('price')),
-      dateIssued: header.findIndex(h=>h.includes('issued')||h.includes('out')||h.includes('date')),
-      piecesRecv: header.findIndex(h=>h.includes('receiv')&&h.includes('piec')),
-      dateRecv:   header.findIndex(h=>h.includes('receiv')&&(h.includes('date')||h.includes('in'))),
-      status:     header.findIndex(h=>h.includes('status')),
-      advance:    header.findIndex(h=>h.includes('advance')||h.includes('paid')||h.includes('payment')),
-    };
-    // If no header detected, try column positions directly
-    const hasHeader=ci.contractor>=0||ci.pieces>=0||ci.rate>=0;
-    const startRow=hasHeader?1:0;
-    for(let i=startRow;i<rows.length;i++){
-      const row=rows[i];if(!row||row.every(c=>!c))continue;
-      const contractor=hasHeader&&ci.contractor>=0?String(row[ci.contractor]||'').trim():String(row[1]||'').trim();
-      const item=hasHeader&&ci.item>=0?String(row[ci.item]||'').trim():String(row[2]||'').trim();
-      const pieces=parseFloat(hasHeader&&ci.pieces>=0?row[ci.pieces]:row[3]);
-      const rate=parseFloat(hasHeader&&ci.rate>=0?row[ci.rate]:row[4]);
-      const dateIssued=toDateStr(hasHeader&&ci.dateIssued>=0?row[ci.dateIssued]:row[5])||today();
-      const piecesRecv=parseFloat(hasHeader&&ci.piecesRecv>=0?row[ci.piecesRecv]:row[6])||null;
-      const dateRecv=toDateStr(hasHeader&&ci.dateRecv>=0?row[ci.dateRecv]:row[7])||null;
-      const advAmt=parseFloat(hasHeader&&ci.advance>=0?row[ci.advance]:row[9])||0;
-      if(!contractor||!pieces||!rate||isNaN(pieces)||isNaN(rate))continue;
-      // Check duplicate
-      const dup=state.lots.find(l=>l.contractorName.toLowerCase()===contractor.toLowerCase()&&l.dateIssued===dateIssued&&Math.abs(l.piecesIssued-pieces)<2);
+
+    const contractorName=sheetName.trim();
+
+    // Col positions (0-indexed):
+    // 0=DATE, 1=ITEM CODE, 2=ITEM NAME, 3=RATE, 4=Pieces sent
+    // 7=REC.DATE, 8=PIECE RECIEVED, 10=TOTAL AMOUNT, 11=PIECES PENDING
+    // 12=payment date, 13=Payment done, 14=Balance, 16=NOTES
+
+    for(let i=1;i<rows.length;i++){
+      const row=rows[i];
+      if(!row||!row[0])continue;
+
+      const dateIssued=toDateStr(row[0]);
+      if(!dateIssued)continue;
+
+      const itemCode=String(row[1]||'').trim();
+      const itemName=String(row[2]||'').trim();
+      const item=(itemName||itemCode||'Garment');
+      const rate=parseFloat(row[3]);
+      const piecesIssued=parseFloat(row[4]);
+      const dateRecv=toDateStr(row[7]);
+      const piecesRecv=parseFloat(row[8]);
+      const totalAmt=parseFloat(row[10]);
+      const piecesPending=parseFloat(row[11]);
+      const paymentDone=parseFloat(row[13]);
+      const balance=parseFloat(row[14]);
+      const notes=String(row[16]||'').trim();
+
+      if(!piecesIssued||!rate||isNaN(piecesIssued)||isNaN(rate))continue;
+
+      // Check duplicate by contractor+date+pieces
+      const dup=state.lots.find(l=>
+        l.contractorName.toLowerCase()===contractorName.toLowerCase()&&
+        l.dateIssued===dateIssued&&
+        Math.abs(l.piecesIssued-Math.round(piecesIssued))<2
+      );
       if(dup){skipped++;continue;}
+
       lotCtr++;
       const lotId='LOT-'+pad(lotCtr);
-      const status=piecesRecv!=null?'RECEIVED':'PENDING';
-      newLots.push({id:lotId,contractorName:contractor,item:item||'Garment',piecesIssued:Math.round(pieces),rate,dateIssued,piecesReceived:isNaN(piecesRecv)?null:Math.round(piecesRecv),dateReceived:dateRecv,status,remarks:''});
-      if(advAmt>0){payCtr++;newPays.push({id:'PAY-'+pad(payCtr),lotId,date:dateIssued,amount:advAmt,mode:'Cash',remarks:'Imported'});}
+
+      // Determine status
+      const hasPending=!isNaN(piecesPending)&&piecesPending>0;
+      const hasBalance=!isNaN(balance)&&balance>0;
+      let status='PENDING';
+      if(!isNaN(piecesRecv)&&piecesRecv>0){
+        if(!hasBalance&&!isNaN(paymentDone)&&paymentDone>0) status='SETTLED';
+        else status='RECEIVED';
+      }
+
+      const actualPiecesRecv=(!isNaN(piecesRecv)&&piecesRecv>0)?Math.round(piecesRecv):null;
+      const lotTotal=isNaN(totalAmt)?Math.round(piecesIssued*rate):Math.round(totalAmt);
+
+      newLots.push({
+        id:lotId,
+        contractorName,
+        item,
+        piecesIssued:Math.round(piecesIssued),
+        rate:Math.round(rate*100)/100,
+        dateIssued,
+        piecesReceived:actualPiecesRecv,
+        dateReceived:dateRecv||null,
+        status,
+        remarks:notes||''
+      });
+
+      // Record payment if payment was made
+      if(!isNaN(paymentDone)&&paymentDone>0){
+        payCtr++;
+        const payDate=toDateStr(row[12])||dateIssued;
+        newPays.push({
+          id:'PAY-'+pad(payCtr),
+          lotId,
+          date:payDate,
+          amount:Math.round(paymentDone),
+          mode:'Cash',
+          remarks:notes?notes.substring(0,50):''
+        });
+      }
     }
   });
+
   return{newLots,newPays,lotCtr,payCtr,skipped};
 }
 function showImportPreview(r){
