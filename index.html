@@ -615,6 +615,9 @@ function clearPayFilter(){payLotFilter=null;renderPays();}
 
 /* ══ MODALS ══ */
 function openModal(type,lotId){
+  // Force show the overlay with inline style - bypasses CSS class issues
+  const el = document.getElementById('modal-'+type);
+  if(el){ el.classList.add('show'); el.style.display='flex'; }
   if(type==='addLot'){
     ['f-contractor','f-item','f-pieces','f-rate','f-remarks'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('f-date').value=today();
@@ -643,10 +646,12 @@ function openReceive(lotId){
   document.getElementById('r-pieces').placeholder=lot.piecesIssued;
   document.getElementById('r-date').value=today();
   document.getElementById('recv-preview').style.display='none';
-  document.getElementById('modal-receive').classList.add('show');
+  const recvEl=document.getElementById('modal-receive');
+  recvEl.classList.add('show');
+  recvEl.style.display='flex';
 }
-function closeModal(type){document.getElementById('modal-'+type).classList.remove('show');}
-document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
+function closeModal(type){const el=document.getElementById('modal-'+type);if(el){el.classList.remove('show');el.style.display='none';}}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o){o.classList.remove('show');o.style.display='none';}}));
 
 /* ══ PREVIEWS ══ */
 function previewLot(){const pcs=+document.getElementById('f-pieces').value,rate=+document.getElementById('f-rate').value,box=document.getElementById('lot-preview');if(pcs&&rate){box.style.display='block';box.textContent='Total agreed: '+fmt(pcs*rate);}else box.style.display='none';}
@@ -696,7 +701,9 @@ function confirmDelete(lotId){
     :'<div style="background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:10px;padding:10px 14px;margin:10px 0;font-size:13px;color:#065F46">✅ No outstanding balance on this lot.</div>';
   document.getElementById('confirm-msg').innerHTML='<div style="margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#1E40AF;background:#DBEAFE;padding:3px 10px;border-radius:20px">'+esc(lot.id)+'</span></div><div style="font-size:13px;color:#555;margin-bottom:4px">Contractor: <strong>'+esc(lot.contractorName)+'</strong><br>Item: <strong>'+esc(lot.item)+'</strong><br>Pieces: <strong>'+fmtN(lot.piecesIssued)+' pcs</strong></div>'+balMsg+'<div style="background:#FFF7ED;border:1px solid #FDE68A;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400E;margin-top:4px">🗑 Also deletes <strong>'+payCount+' payment(s)</strong>. Cannot be undone.</div>';
   document.getElementById('confirm-ok-btn').onclick=function(){doDelete(lotId);closeModal('confirm');};
-  document.getElementById('modal-confirm').classList.add('show');
+  const confEl=document.getElementById('modal-confirm');
+  confEl.classList.add('show');
+  confEl.style.display='flex';
 }
 function doDelete(id){
   state.lots=state.lots.filter(l=>l.id!==id);
@@ -713,7 +720,9 @@ function openImportModal(){
   document.getElementById('imp-file').value='';
   document.getElementById('imp-foot').innerHTML='<button class="btn" style="flex:1;justify-content:center" onclick="closeModal(\'import\')">Cancel</button>';
   importData=null;
-  document.getElementById('modal-import').classList.add('show');
+  const impEl=document.getElementById('modal-import');
+  impEl.classList.add('show');
+  impEl.style.display='flex';
 }
 function readImportFile(input){
   const file=input.files[0];if(!file)return;
