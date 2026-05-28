@@ -148,6 +148,7 @@ input:focus,select:focus{border-color:var(--n);box-shadow:0 0 0 3px #DBEAFE}
   <div class="spin">🧵</div>
   <div style="font-size:20px;font-weight:700">Contractor Tracker</div>
   <p style="font-size:13px;color:#B0C4DE;margin-top:6px">Modrobe Impex</p>
+  <p style="font-size:11px;color:#4A6FA5;margin-top:20px">v28-MAY</p>
 </div>
 
 <div id="pg-login">
@@ -330,15 +331,20 @@ input:focus,select:focus{border-color:var(--n);box-shadow:0 0 0 3px #DBEAFE}
 </div></div>
 
 <script>
-// ERROR DISPLAY - shows JS errors on loading screen
 window.onerror = function(msg, src, line) {
-  document.getElementById('pg-load').innerHTML = 
+  document.getElementById('pg-load').innerHTML =
     '<div style="padding:20px;color:#fff;max-width:360px;text-align:left">' +
-    '<div style="font-size:24px;margin-bottom:12px">Error Found</div>' +
-    '<div style="background:rgba(0,0,0,.4);padding:12px;border-radius:8px;font-size:12px;word-break:break-all">' +
+    '<div style="font-size:20px;font-weight:700;margin-bottom:10px">&#9888; JS Error</div>' +
+    '<div style="background:rgba(0,0,0,.5);padding:12px;border-radius:8px;font-size:12px;word-break:break-all">' +
     msg + '<br><br>Line: ' + line + '</div>' +
-    '<div style="margin-top:12px;font-size:11px;color:#AAC4DE">Screenshot this and share it</div></div>';
+    '<div style="margin-top:12px;font-size:11px;color:#AAC4DE">Screenshot this and share</div></div>';
 };
+
+setTimeout(function(){
+  if(document.getElementById('pg-load').style.display !== 'none'){
+    showLogin();
+  }
+}, 12000);
 
 firebase.initializeApp({apiKey:"AIzaSyDRfRBzqdg8LCUjZKdGRNIsKCBszbtM7ok",authDomain:"challan-manager-85768.firebaseapp.com",projectId:"challan-manager-85768",storageBucket:"challan-manager-85768.firebasestorage.app",messagingSenderId:"667915790046",appId:"1:667915790046:web:92b61ba86c9facd620444f"});
 var auth=firebase.auth(),db=firebase.firestore();
