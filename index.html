@@ -291,6 +291,33 @@ input:focus,select:focus{border-color:var(--navy);box-shadow:0 0 0 3px #DBEAFE}
   <div class="mfoot"><button class="btn" style="flex:1;justify-content:center" onclick="closeModal('receive')">Cancel</button><button class="btn pri" style="flex:1;justify-content:center" onclick="receiveLot()">Confirm</button></div>
 </div></div>
 
+<!-- EDIT LOT -->
+<div class="overlay" id="mo-editLot">
+<div class="mbox"><div class="mhandle"></div>
+  <div class="mhead"><div><h3>✏️ Edit Lot</h3><div class="msub" id="el-sub"></div></div><button class="xbtn" onclick="closeModal('editLot')">✕</button></div>
+  <div class="mbody">
+    <div class="fr"><div><label>Contractor *</label><input id="el-con" oninput="previewEditLot()"></div><div><label>Item *</label><input id="el-item" oninput="previewEditLot()"></div></div>
+    <div class="fr"><div><label>Pieces *</label><input id="el-pcs" type="number" inputmode="numeric" oninput="previewEditLot()"></div><div><label>Rate (Rs./pc) *</label><input id="el-rate" type="number" inputmode="decimal" oninput="previewEditLot()"></div></div>
+    <div class="fg"><label>Date Issued *</label><input id="el-date" type="date"></div>
+    <div class="fg"><label>Remarks</label><input id="el-rmk"></div>
+    <div class="ibox blue" id="el-prev" style="display:none"></div>
+  </div>
+  <div class="mfoot"><button class="btn" style="flex:1;justify-content:center" onclick="closeModal('editLot')">Cancel</button><button class="btn pri" style="flex:1;justify-content:center" onclick="saveEditLot()">✓ Save Changes</button></div>
+</div></div>
+
+<!-- EDIT CONTRACTOR -->
+<div class="overlay" id="mo-editCon">
+<div class="mbox"><div class="mhandle"></div>
+  <div class="mhead"><h3>✏️ Edit Contractor</h3><button class="xbtn" onclick="closeModal('editCon')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>Contractor Name *</label><input id="ec-name" placeholder="Contractor name"></div>
+    <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:12px;font-size:12px;color:#92400E;margin-top:4px">
+      ⚠️ Renaming will update this contractor's name across all their lots.
+    </div>
+  </div>
+  <div class="mfoot"><button class="btn" style="flex:1;justify-content:center" onclick="closeModal('editCon')">Cancel</button><button class="btn pri" style="flex:1;justify-content:center" onclick="saveEditCon()">✓ Save Changes</button></div>
+</div></div>
+
 <div class="overlay" id="mo-confirm">
 <div class="mbox" style="max-height:80vh"><div class="mhandle"></div>
   <div class="mhead"><h3>Confirm Delete</h3><button class="xbtn" onclick="closeModal('confirm')">✕</button></div>
@@ -479,7 +506,7 @@ function renderContractors(){
     const pending=lots.filter(l=>l.status==='PENDING').length;
     const recvd=lots.filter(l=>l.status==='RECEIVED').length;
     const totalBal=lots.reduce((s,l)=>s+Math.max(0,bal(l)),0);
-    return '<div class="crow" onclick="openContractor(\''+esc(name)+'\')">'+
+    return '<div class="crow" onclick="openContractor('+esc(name)+')">'+
       '<div class="cav" style="background:'+avc(i)+'">'+esc(ini(name))+'</div>'+
       '<div class="cinfo"><div class="cname">'+esc(name)+'</div><div class="cmeta">'+lots.length+' lot(s) · '+pending+' pending · '+recvd+' received</div></div>'+
       '<div class="cbal-wrap"><div class="cbal '+(totalBal>0?'red':'zero')+'">'+fmt(totalBal)+'</div><div class="cbl">'+(totalBal>0?'due':'clear')+'</div></div>'+
@@ -528,10 +555,10 @@ function renderDetail(name){
       '<div class="sc"><div class="sl">Lots</div><div class="sv warn">'+pending+' pending</div></div>'+
     '</div>'+
     '<div class="cacts">'+
-      '<button class="cact green" onclick="openPayFor(\''+esc(name)+'\')">💵 Payment</button>'+
-      '<button class="cact blue" onclick="openLotFor(\''+esc(name)+'\')">+ New Lot</button>'+
-      '<button class="cact purple" onclick="printReport(\''+esc(name)+'\')">🖨 Report</button>'+
-      '<button class="cact red" onclick="goTab(\'pays\')">🕒 Payments</button>'+
+      '<button class="cact green" onclick="openPayFor('+esc(name)+')">💵 Payment</button>'+
+      '<button class="cact blue" onclick="openLotFor('+esc(name)+')">+ New Lot</button>'+
+      '<button class="cact blue" style="background:#F0FFF4;color:#059669" onclick="openEditCon('+esc(name)+')">✏️ Edit</button>'+
+      '<button class="cact purple" onclick="printReport('+esc(name)+')">🖨 Report</button>'+
     '</div>'+
     (totalBal>0?'<div class="ibox red">Outstanding: <strong>'+fmt(totalBal)+'</strong></div>':'<div class="ibox green">✅ No outstanding balance</div>')+
     '<div class="sh" style="margin-top:12px"><h2>Lots</h2></div>'+lotsHtml+
@@ -543,34 +570,34 @@ function lotCard(lot){
   const a=adv(lot.id),payable=(lot.piecesReceived!=null?lot.piecesReceived:lot.piecesIssued)*lot.rate,b=payable-a;
   const miss=lot.piecesReceived!=null?lot.piecesIssued-lot.piecesReceived:null;
   const lpc=S.pays.filter(p=>p.lotId===lot.id).length;
-  const ap=(lot.status==='PENDING'||lot.status==='RECEIVED')?'<button class="btn sm" onclick="openPayModal(\''+lot.id+'\')">💵 Pay</button>':'';
-  const ar=lot.status==='PENDING'?'<button class="btn sm" onclick="openRecv(\''+lot.id+'\')">📥 Receive</button>':'';
-  const as=lot.status==='RECEIVED'?'<button class="btn sm grn" onclick="settleLot(\''+lot.id+'\')">✅ Settle</button>':'';
+  const ap=(lot.status==='PENDING'||lot.status==='RECEIVED')?'<button class="btn sm" onclick="openPayModal('"+lot.id+"')">💵 Pay</button>':'';
+  const ar=lot.status==='PENDING'?'<button class="btn sm" onclick="openRecv('"+lot.id+"')">📥 Receive</button>':'';
+  const as=lot.status==='RECEIVED'?'<button class="btn sm grn" onclick="settleLot('"+lot.id+"')">✅ Settle</button>':'';
   return '<div class="lot-card">'+
     '<div class="lot-card-header"><div style="display:flex;align-items:center;gap:8px"><span class="lid">'+esc(lot.id)+'</span><div><div class="lname">'+esc(lot.contractorName)+'</div><div class="litem">'+esc(lot.item)+'</div></div></div><span class="sbadge s-'+lot.status+'">'+lot.status+'</span></div>'+
     '<div class="lnums"><div class="nb"><div class="nl">Issued</div><div class="nv">'+fmtN(lot.piecesIssued)+' pcs</div></div><div class="nb"><div class="nl">Rate</div><div class="nv">Rs.'+lot.rate+'</div></div><div class="nb"><div class="nl">Total</div><div class="nv">'+fmt(lot.piecesIssued*lot.rate)+'</div></div><div class="nb"><div class="nl">Paid</div><div class="nv '+(a>0?'warn':'')+'">'+fmt(a)+'</div></div><div class="nb"><div class="nl">Balance</div><div class="nv '+(b>0?'red':'')+'">'+fmt(b)+'</div></div></div>'+
     '<div class="lmeta"><span>📤 '+fmtD(lot.dateIssued)+'</span><span>📥 '+fmtD(lot.dateReceived)+'</span>'+(miss!=null?'<span class="'+(miss>0?'miss':'ok')+'">'+(miss>0?'⚠ ':'✓ ')+'Rcvd '+fmtN(lot.piecesReceived)+(miss>0?' ('+miss+' short)':'')+'</span>':'')+(lot.remarks?'<span class="note">'+esc(lot.remarks)+'</span>':'')+'</div>'+
-    '<div class="lacts">'+ap+ar+as+'<button class="btn sm pur" onclick="printLot(\''+lot.id+'\')">🖨</button><button class="btn sm" style="margin-left:auto" onclick="openContractor(\''+esc(lot.contractorName)+'\')">👷 View</button><button class="btn sm red" onclick="confirmDel(\''+lot.id+'\')">🗑</button></div>'+
+    '<div class="lacts">'+ap+ar+as+'<button class="btn sm pur" onclick="printLot('"+lot.id+"')">🖨</button><button class="btn sm" style="color:#059669;border-color:#6EE7B7" onclick="openEditLot('"+lot.id+"')">✏️ Edit</button><button class="btn sm" style="margin-left:auto" onclick="openContractor('"+esc(lot.contractorName)+"')">👷 View</button><button class="btn sm red" onclick="confirmDel('"+lot.id+"')">🗑</button></div>'+
   '</div>';
 }
 
 function lotCardDetail(lot){
   const a=adv(lot.id),payable=(lot.piecesReceived!=null?lot.piecesReceived:lot.piecesIssued)*lot.rate,b=payable-a;
   const miss=lot.piecesReceived!=null?lot.piecesIssued-lot.piecesReceived:null;
-  const ap=(lot.status==='PENDING'||lot.status==='RECEIVED')?'<button class="btn sm" onclick="openPayModal(\''+lot.id+'\')">💵 Pay</button>':'';
-  const ar=lot.status==='PENDING'?'<button class="btn sm" onclick="openRecv(\''+lot.id+'\')">📥 Receive</button>':'';
-  const as=lot.status==='RECEIVED'?'<button class="btn sm grn" onclick="settleLot(\''+lot.id+'\')">✅ Settle</button>':'';
+  const ap=(lot.status==='PENDING'||lot.status==='RECEIVED')?'<button class="btn sm" onclick="openPayModal('"+lot.id+"')">💵 Pay</button>':'';
+  const ar=lot.status==='PENDING'?'<button class="btn sm" onclick="openRecv('"+lot.id+"')">📥 Receive</button>':'';
+  const as=lot.status==='RECEIVED'?'<button class="btn sm grn" onclick="settleLot('"+lot.id+"')">✅ Settle</button>':'';
   return '<div class="lot-card">'+
     '<div class="lot-card-header"><div style="display:flex;align-items:center;gap:8px"><span class="lid">'+esc(lot.id)+'</span><div><div class="lname">'+esc(lot.item)+'</div><div class="litem">'+fmtD(lot.dateIssued)+'</div></div></div><span class="sbadge s-'+lot.status+'">'+lot.status+'</span></div>'+
     '<div class="lnums"><div class="nb"><div class="nl">Issued</div><div class="nv">'+fmtN(lot.piecesIssued)+' pcs</div></div><div class="nb"><div class="nl">Rate</div><div class="nv">Rs.'+lot.rate+'</div></div><div class="nb"><div class="nl">Total</div><div class="nv">'+fmt(lot.piecesIssued*lot.rate)+'</div></div><div class="nb"><div class="nl">Paid</div><div class="nv '+(a>0?'warn':'')+'">'+fmt(a)+'</div></div><div class="nb"><div class="nl">Balance</div><div class="nv '+(b>0?'red':'')+'">'+fmt(b)+'</div></div></div>'+
     '<div class="lmeta">'+(miss!=null?'<span class="'+(miss>0?'miss':'ok')+'">'+(miss>0?'⚠ ':'✓ ')+'Rcvd '+fmtN(lot.piecesReceived)+(miss>0?' ('+miss+' short)':'')+'</span>':'')+(lot.remarks?'<span class="note">'+esc(lot.remarks)+'</span>':'')+'</div>'+
-    '<div class="lacts">'+ap+ar+as+'<button class="btn sm pur" onclick="printLot(\''+lot.id+'\')">🖨</button><button class="btn sm red" style="margin-left:auto" onclick="confirmDel(\''+lot.id+'\')">🗑</button></div>'+
+    '<div class="lacts">'+ap+ar+as+'<button class="btn sm pur" onclick="printLot('"+lot.id+"')">🖨</button><button class="btn sm" style="color:#059669;border-color:#6EE7B7" onclick="openEditLot('"+lot.id+"')">✏️ Edit</button><button class="btn sm red" style="margin-left:auto" onclick="confirmDel('"+lot.id+"')">🗑</button></div>'+
   '</div>';
 }
 
 function renderLots(){
   const filters=['ALL','PENDING','RECEIVED','SETTLED'];
-  document.getElementById('lots-fbar').innerHTML=filters.map(f=>'<button class="fb '+(curFilter===f?'on':'')+'" onclick="setFilter(\''+f+'\')">'+( f==='ALL'?'All':f.charAt(0)+f.slice(1).toLowerCase())+'</button>').join('');
+  document.getElementById('lots-fbar').innerHTML=filters.map(f=>'<button class="fb '+(curFilter===f?'on':'')+'" onclick="setFilter('"+f+"')">'+( f==='ALL'?'All':f.charAt(0)+f.slice(1).toLowerCase())+'</button>').join('');
   const vis=curFilter==='ALL'?S.lots:S.lots.filter(l=>l.status===curFilter);
   document.getElementById('lots-list').innerHTML=vis.length?[...vis].reverse().map(lotCard).join(''):'<div class="empty"><div class="ei">📦</div><p>No '+(curFilter==='ALL'?'lots yet':''+curFilter.toLowerCase()+' lots')+'.</p></div>';
 }
@@ -663,7 +690,7 @@ function openImport(){
   closeMenu();
   ['imp1','imp2','imp3','imp4'].forEach((id,i)=>document.getElementById(id).style.display=i===0?'block':'none');
   document.getElementById('imp-file').value='';
-  document.getElementById('imp-foot').innerHTML='<button class="btn" style="flex:1;justify-content:center" onclick="closeModal(\'import\')">Cancel</button>';
+  document.getElementById('imp-foot').innerHTML='<button class="btn" style="flex:1;justify-content:center" onclick="closeModal('import')">Cancel</button>';
   impData=null;
   const el=document.getElementById('mo-import');el.classList.add('show');el.style.display='flex';
 }
@@ -761,7 +788,7 @@ function showPreview(r){
     '</div>';
   if(!r.newLots.length){
     document.getElementById('imp-list').innerHTML='<div style="text-align:center;padding:16px;color:#888;font-size:13px">No new lots to import.</div>';
-    document.getElementById('imp-foot').innerHTML='<button class="btn pri" style="flex:1;justify-content:center" onclick="closeModal(\'import\')">OK</button>';
+    document.getElementById('imp-foot').innerHTML='<button class="btn pri" style="flex:1;justify-content:center" onclick="closeModal('import')">OK</button>';
     return;
   }
   const byName={};
@@ -775,7 +802,7 @@ function showPreview(r){
     ).join('')+'</div>'
   ).join('');
   document.getElementById('imp-foot').innerHTML=
-    '<button class="btn" style="flex:1;justify-content:center" onclick="closeModal(\'import\')">Cancel</button>'+
+    '<button class="btn" style="flex:1;justify-content:center" onclick="closeModal('import')">Cancel</button>'+
     '<button class="btn pri" style="flex:1;justify-content:center" onclick="doImport()">✓ Import Now</button>';
 }
 async function doImport(){
@@ -785,7 +812,7 @@ async function doImport(){
   await save();
   document.getElementById('imp3').style.display='none';document.getElementById('imp4').style.display='block';
   document.getElementById('imp-done').textContent='✅ Imported '+impData.newLots.length+' lots and '+impData.newPays.length+' payments!';
-  document.getElementById('imp-foot').innerHTML='<button class="btn pri" style="flex:1;justify-content:center" onclick="closeModal(\'import\')">Done</button>';
+  document.getElementById('imp-foot').innerHTML='<button class="btn pri" style="flex:1;justify-content:center" onclick="closeModal('import')">Done</button>';
   render();
 }
 
@@ -830,6 +857,144 @@ function printReport(name){
     '<div class="sig"><div><div class="sl">Contractor<br><strong>'+esc(name)+'</strong></div></div><div><div class="sl">Authorised<br><strong>Modrobe Impex</strong></div></div></div>'+
     '</div></body></html>');
   w.document.close();
+}
+</script>
+</body>
+</html
+function printReport(name){
+  const lots=S.lots.filter(l=>l.contractorName===name);
+  const pays=S.pays.filter(p=>lots.find(l=>l.id===p.lotId));
+  const tb=lots.reduce((s,l)=>s+(l.piecesIssued*l.rate),0);
+  const tp=pays.reduce((s,p)=>s+p.amount,0);
+  const tbal=lots.reduce((s,l)=>s+Math.max(0,bal(l)),0);
+  const rows=lots.map((l,i)=>{
+    const a=adv(l.id);
+    const b=((l.piecesReceived!=null?l.piecesReceived:l.piecesIssued)*l.rate)-a;
+    const sc=l.status==='SETTLED'?'#065F46':l.status==='RECEIVED'?'#1E40AF':'#92400E';
+    const sb=l.status==='SETTLED'?'#D1FAE5':l.status==='RECEIVED'?'#DBEAFE':'#FEF3C7';
+    return '<tr style="background:'+(i%2?'#F9F9F9':'#fff')+'">'
+      +'<td style="padding:7px 10px;border:1px solid #E0E0E0">'+esc(l.id)+'</td>'
+      +'<td style="padding:7px 10px;border:1px solid #E0E0E0">'+fmtD(l.dateIssued)+'</td>'
+      +'<td style="padding:7px 10px;border:1px solid #E0E0E0">'+esc(l.item)+'</td>'
+      +'<td style="padding:7px 10px;border:1px solid #E0E0E0;text-align:center">'+fmtN(l.piecesIssued)+'</td>'
+      +'<td style="padding:7px 10px;border:1px solid #E0E0E0;text-align:right">'+fmt(l.piecesIssued*l.rate)+'</td>'
+      +'<td style="padding:7px 10px;border:1px solid #E0E0E0;text-align:right;color:#059669">'+fmt(a)+'</td>'
+      +'<td style="padding:7px 10px;border:1px solid #E0E0E0;text-align:right;color:'+(b>0?'#DC2626':'#059669')+'">'+fmt(b)+'</td>'
+      +'<td style="padding:7px 10px;border:1px solid #E0E0E0;text-align:center"><span style="background:'+sb+';color:'+sc+';padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700">'+l.status+'</span></td>'
+      +'</tr>';
+  }).join('');
+  const w=window.open('','_blank');
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+esc(name)+'</title>'
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:13px}'
+    +'@media print{.np{display:none!important}@page{margin:12mm;size:A4}}'
+    +'.pg{max-width:760px;margin:0 auto;padding:24px}'
+    +'.pb{background:#f0f0f0;padding:10px 16px;display:flex;gap:10px;margin:-24px -24px 24px}'
+    +'.pb button{padding:8px 20px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600}'
+    +'.top{display:flex;justify-content:space-between;border-bottom:3px solid #1F3864;padding-bottom:14px;margin-bottom:16px}'
+    +'table{width:100%;border-collapse:collapse;font-size:12px}'
+    +'th{background:#1F3864;color:#fff;padding:8px 10px;text-align:left;font-size:11px}'
+    +'.sum{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0}'
+    +'.sb{border:1.5px solid #E0E0E0;border-radius:8px;padding:10px;text-align:center}'
+    +'.db{border:2px solid #1F3864;border-radius:8px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;margin:14px 0;background:#EFF6FF}'
+    +'.sig{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px;padding-top:16px;border-top:1px dashed #CCC}'
+    +'.sl{border-top:1.5px solid #1A1A1A;margin-top:36px;padding-top:5px;font-size:11px;font-weight:600;text-align:center}'
+    +'</style></head><body><div class="pg">'
+    +'<div class="pb np"><button onclick="window.print()" style="background:#1F3864;color:#fff">Print</button><button onclick="window.close()" style="background:#fff;border:1px solid #CCC">Close</button></div>'
+    +'<div class="top"><div><div style="font-size:19px;font-weight:700;color:#1F3864">Modrobe Impex</div></div>'
+    +'<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:#1F3864">CONTRACTOR STATEMENT</div>'
+    +'<div style="font-size:17px;font-weight:700;margin-top:3px">'+esc(name)+'</div></div></div>'
+    +'<div class="sum">'
+    +'<div class="sb"><div style="font-size:10px;color:#888;margin-bottom:4px">Total Billed</div><div style="font-size:16px;font-weight:700;color:#1F3864">'+fmt(tb)+'</div></div>'
+    +'<div class="sb"><div style="font-size:10px;color:#888;margin-bottom:4px">Total Paid</div><div style="font-size:16px;font-weight:700;color:#059669">'+fmt(tp)+'</div></div>'
+    +'<div class="sb"><div style="font-size:10px;color:#888;margin-bottom:4px">Balance</div><div style="font-size:16px;font-weight:700;color:'+(tbal>0?'#DC2626':'#059669')+'">'+fmt(tbal)+'</div></div>'
+    +'</div>'
+    +'<table><thead><tr><th>Lot ID</th><th>Date</th><th>Item</th><th>Pcs</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Status</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table>'
+    +'<div class="db"><div style="font-size:13px;font-weight:600;color:#1F3864">NET OUTSTANDING</div>'
+    +'<div style="font-size:22px;font-weight:700;color:'+(tbal>0?'#DC2626':'#059669')+'">'+fmt(tbal)+(tbal<=0?' (CLEAR)':'')+'</div></div>'
+    +'<div class="sig"><div><div class="sl">Contractor<br><strong>'+esc(name)+'</strong></div></div>'
+    +'<div><div class="sl">Authorised<br><strong>Modrobe Impex</strong></div></div></div>'
+    +'<div style="text-align:center;font-size:10px;color:#AAA;margin-top:8px">Generated: '+new Date().toLocaleString('en-IN')+'</div>'
+    +'</div></body></html>';
+  w.document.write(html);
+  w.document.close();
+}
+</script>
+
+<div class="overlay" id="mo-editLot">
+<div class="mbox"><div class="mhandle"></div>
+  <div class="mhead"><div><h3>✏️ Edit Lot</h3><div class="msub" id="el-sub"></div></div><button class="xbtn" onclick="closeModal('editLot')">✕</button></div>
+  <div class="mbody">
+    <div class="fr"><div><label>Contractor *</label><input id="el-con" placeholder="Contractor name" oninput="previewEditLot()"></div><div><label>Item *</label><input id="el-item" placeholder="e.g. Lower, Kurta" oninput="previewEditLot()"></div></div>
+    <div class="fr"><div><label>Pieces Issued *</label><input id="el-pcs" type="number" inputmode="numeric" oninput="previewEditLot()"></div><div><label>Rate (Rs./pc) *</label><input id="el-rate" type="number" inputmode="decimal" oninput="previewEditLot()"></div></div>
+    <div class="fg"><label>Date Issued *</label><input id="el-date" type="date"></div>
+    <div class="fg"><label>Remarks</label><input id="el-rmk" placeholder="Optional"></div>
+    <div class="ibox blue" id="el-prev" style="display:none"></div>
+  </div>
+  <div class="mfoot"><button class="btn" style="flex:1;justify-content:center" onclick="closeModal('editLot')">Cancel</button><button class="btn pri" style="flex:1;justify-content:center" onclick="saveEditLot()">✓ Save Changes</button></div>
+</div></div>
+
+<div class="overlay" id="mo-editCon">
+<div class="mbox"><div class="mhandle"></div>
+  <div class="mhead"><div><h3>✏️ Edit Contractor</h3><div class="msub" id="ec-sub"></div></div><button class="xbtn" onclick="closeModal('editCon')">✕</button></div>
+  <div class="mbody">
+    <div class="fg"><label>Contractor Name *</label><input id="ec-name" placeholder="Contractor name"></div>
+    <div style="background:#FFF7ED;border:1px solid #FDE68A;border-radius:10px;padding:12px;font-size:12px;color:#92400E;margin-top:4px">⚠️ Renaming updates all lots linked to this contractor automatically.</div>
+  </div>
+  <div class="mfoot"><button class="btn" style="flex:1;justify-content:center" onclick="closeModal('editCon')">Cancel</button><button class="btn pri" style="flex:1;justify-content:center" onclick="saveEditCon()">✓ Save Changes</button></div>
+</div></div>
+
+<script>
+let editLotId=null;
+function openEditLot(lotId){
+  const lot=S.lots.find(l=>l.id===lotId);if(!lot)return;
+  editLotId=lotId;
+  document.getElementById('el-sub').textContent=lotId+' · '+lot.contractorName;
+  document.getElementById('el-con').value=lot.contractorName;
+  document.getElementById('el-item').value=lot.item;
+  document.getElementById('el-pcs').value=lot.piecesIssued;
+  document.getElementById('el-rate').value=lot.rate;
+  document.getElementById('el-date').value=lot.dateIssued;
+  document.getElementById('el-rmk').value=lot.remarks||'';
+  document.getElementById('el-prev').style.display='none';
+  const el=document.getElementById('mo-editLot');el.classList.add('show');el.style.display='flex';
+}
+function previewEditLot(){
+  const p=+document.getElementById('el-pcs').value,r=+document.getElementById('el-rate').value,b=document.getElementById('el-prev');
+  if(p&&r){b.style.display='block';b.textContent='Total: '+fmt(p*r)+' ('+fmtN(p)+' pcs x Rs.'+r+')';}
+  else b.style.display='none';
+}
+function saveEditLot(){
+  const lot=S.lots.find(l=>l.id===editLotId);if(!lot)return;
+  const nc=document.getElementById('el-con').value.trim();
+  const ni=document.getElementById('el-item').value.trim();
+  const np=+document.getElementById('el-pcs').value;
+  const nr=+document.getElementById('el-rate').value;
+  const nd=document.getElementById('el-date').value;
+  const nm=document.getElementById('el-rmk').value.trim();
+  if(!nc||!ni||!np||!nr||!nd){alert('Please fill all required fields.');return;}
+  lot.contractorName=nc;lot.item=ni;lot.piecesIssued=np;lot.rate=nr;lot.dateIssued=nd;lot.remarks=nm;
+  save();closeModal('editLot');render();
+  if(curCon)renderDetail(curCon);
+}
+let editConName=null;
+function openEditCon(name){
+  editConName=name;
+  document.getElementById('ec-sub').textContent=name;
+  document.getElementById('ec-name').value=name;
+  const el=document.getElementById('mo-editCon');el.classList.add('show');el.style.display='flex';
+}
+function saveEditCon(){
+  if(!editConName)return;
+  const nn=document.getElementById('ec-name').value.trim();
+  if(!nn){alert('Name is required.');return;}
+  const names=getConNames();
+  if(nn.toLowerCase()!==editConName.toLowerCase()&&names.find(n=>n.toLowerCase()===nn.toLowerCase())){alert('A contractor with this name already exists.');return;}
+  S.lots.forEach(l=>{if(l.contractorName===editConName)l.contractorName=nn;});
+  curCon=nn;editConName=nn;
+  save();closeModal('editCon');
+  document.getElementById('tb-title').textContent=nn;
+  render();renderDetail(nn);
 }
 </script>
 </body>
